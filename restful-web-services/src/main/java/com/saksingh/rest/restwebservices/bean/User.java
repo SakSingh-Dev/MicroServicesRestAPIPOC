@@ -8,12 +8,18 @@ import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+@JsonFilter("User")
 public class User {
 	private Integer id;
 	@Size(min = 2, message = "User Name should be atleast 2 character")
 	@NotBlank(message = "Names Should not be Blank")
 	@Pattern(regexp = "^[A-Za-z]+$", message = "Name should contain only Character")
 	private String name;
+	
+	//Ignore this field in response
+	//@JsonIgnore//
     @Past(message = "Date of birth must be a past date.")
 	private Date dob;
 

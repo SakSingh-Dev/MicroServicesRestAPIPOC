@@ -11,9 +11,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.saksingh.rest.restwebservices.bean.HelloWorldBean;
 import com.saksingh.rest.restwebservices.bean.User;
 import com.saksingh.rest.restwebservices.dao.UserDao;
@@ -34,6 +36,7 @@ handle Rest request like GET,POST ,PUT-So we ause annotation- @Rest COntoller*/
  *
  */
 @RestController
+@RequestMapping("/HelloWorldController")
 public class HelloWorldController {
 	@Autowired
 	UserDao userDao;
@@ -74,6 +77,15 @@ public class HelloWorldController {
 	public List<User> getUsersList() {
 		return userDao.getAllUsers();
 	}
+	
+	@GetMapping(path = "/user-filter")
+	public MappingJacksonValue getFilteredUsersList() {
+		List<User> users = userDao.getAllUsers();
+		MappingJacksonValue mppiJacksonValue =  new MappingJacksonValue(users);
+		mppiJacksonValue.setFilters(new SimpleFilterProvider().addFilter("User", SimpleBeanPropertyFilter.filterOutAllExcept("name")));
+		return mppiJacksonValue;
+	}
+	
 
 	// HATEOAS-Hypermedia as the Engine of Application State.
 	// HATEOAS Means to provide the hyperlink to the user/resource. FOr example when
@@ -83,14 +95,14 @@ public class HelloWorldController {
 	@GetMapping(path = "/user/{id}")
 	public Resource<User> findUser(@PathVariable Integer id) {
 		User user = userDao.findUser(id);
-
+		if (null == user)
+			throw new UserNotFoundException(String.format("User ID-[%s] is not avialable in Database", id));
 		// HATEOAS- We would want to link to this method-getUsersList
 		Resource<User> resource = new Resource<User>(user);
 		ControllerLinkBuilder linkTo = ControllerLinkBuilder
 				.linkTo(ControllerLinkBuilder.methodOn(this.getClass()).getUsersList());
 		resource.add(linkTo.withRel("Link To All User"));
-		if (null == user)
-			throw new UserNotFoundException(String.format("User ID-[%s] is not avialable in Database", id));
+		
 		return resource;
 	}
 
@@ -100,12 +112,12 @@ public class HelloWorldController {
 	 * using @Valid
 	 * 
 	 * @Valid-Comes with Javax Validation package to validate the Bean Whenever we
-	 * do POst operation we need to send the Status code of Resposne wether it
+	 * do POst operation we need to send the Status code of Response wether it
 	 * success or not and then URI of newly created resource
 	 */
-	// @RequestMapping(method=RequestMethod.POST,path = "/user")
+    @RequestMapping(method=RequestMethod.POST,path = "/user")
 
-	@PostMapping(path = "/user")
+	//@PostMapping(path = "/user")
 	public ResponseEntity<User> addNewUser(@RequestBody @Valid User user) {
 		User savedUser = userDao.save(user);
 		URI savedresouceLocation = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
