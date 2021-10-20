@@ -1,6 +1,6 @@
 package com.saksingh.rest.restwebservices.bean;
 
-public class HelloWorldBean  {
+public class HelloWorldBean {
 
 	private String message;
 

@@ -42,6 +42,13 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 		return new ResponseEntity<CustomizedExceptionResponse> (customizedExceptionResponse,HttpStatus.NOT_FOUND);
 	}
 	
+	@ExceptionHandler(NoPostFoundException.class)
+	public final ResponseEntity<CustomizedExceptionResponse> handleNoPostFoundException(Exception ex, WebRequest request) throws Exception {
+		
+		CustomizedExceptionResponse customizedExceptionResponse = new CustomizedExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+		return new ResponseEntity<CustomizedExceptionResponse> (customizedExceptionResponse,HttpStatus.NOT_FOUND);
+	}
+	
 	/**
 	 * Customize the response for MethodArgumentNotValidException.
 	 * <p>This method delegates to {@link #handleExceptionInternal}.

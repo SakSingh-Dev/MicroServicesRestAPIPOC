@@ -78,6 +78,7 @@ public class HelloWorldController {
 		return userDao.getAllUsers();
 	}
 	
+	//Filtering Response
 	@GetMapping(path = "/user-filter")
 	public MappingJacksonValue getFilteredUsersList() {
 		List<User> users = userDao.getAllUsers();
@@ -85,12 +86,16 @@ public class HelloWorldController {
 		mppiJacksonValue.setFilters(new SimpleFilterProvider().addFilter("User", SimpleBeanPropertyFilter.filterOutAllExcept("name")));
 		return mppiJacksonValue;
 	}
-	
 
 	// HATEOAS-Hypermedia as the Engine of Application State.
 	// HATEOAS Means to provide the hyperlink to the user/resource. FOr example when
-	// we retrive a list then each list have a hyperlink or single resource has a
+	// we retrieve a list then each list have a hyperlink or single resource has a
 	// hyperlink
+	
+	/*HATEOUS UPdate in v2.5.0
+	 * HATEOAS code with earlier versions looks
+	 * something like this: Resource and ControllerLinkBuilder instead of EntityModel and WebMvcLinkBuilder.
+	 */
 
 	@GetMapping(path = "/user/{id}")
 	public Resource<User> findUser(@PathVariable Integer id) {
@@ -134,4 +139,6 @@ public class HelloWorldController {
 		}
 		return ResponseEntity.noContent().build();// Send empty 200 status.
 	}
+	
+
 }
